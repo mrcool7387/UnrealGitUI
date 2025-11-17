@@ -1,4 +1,5 @@
 from github import Github
+from github.Commit import Commit
 from main.github_tools.token import GIT_AUTH_TOKEN
 
 GIT_CLIENT = Github(GIT_AUTH_TOKEN)
@@ -38,7 +39,15 @@ def get_last_release(repo_name: str):
         return None
     return releases[0]
 
-def get_last_x_commits(repo_name: str, x: int = 5):
+def get_last_x_commits(repo_name: str, x: int = 5) -> list[Commit]:
     repo = GIT_CLIENT.get_repo(repo_name)
     commits = repo.get_commits()
-    return commits
+
+    # PyGithub gibt die neuesten Commits zuerst zurück!
+    commit_list: list[Commit] = []
+    for i, commit in enumerate(commits):
+        if i >= x:
+            break
+        commit_list.append(commit)
+
+    return commit_list

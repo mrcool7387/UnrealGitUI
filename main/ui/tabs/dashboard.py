@@ -129,9 +129,19 @@ class DashboardUI(ctk.CTkFrame):
         LOGGER.debug("Status Data: {}".format(status_data))
         
         # Table displaying last 5 commits in commit_table_frame
-        all_commits = get_last_x_commits(REPO, 5)
-        for commit in all_commits:
-            LOGGER.info((commit.last_modified, commit.stats))
+        last_five_commits = get_last_x_commits(REPO, CONFIG.get("dashboard", {}).get("last_commits", 5))
+        table_data: list[list[str]] = [["SHA", "Add", "Del", "Total"]]
+        for c in last_five_commits:
+            table_data.append([str(c.sha[10:]) + "...", str(c.stats.additions), str(c.stats.deletions), str(c.stats.total)])
+
+        table_label = ctk.CTkLabel(self.commit_table_frame, text=f"Last {CONFIG.get("dashboard", {}).get("last_commits", 5)} Commits", font=("", 14))
+        table_label.pack(pady=10)
+
+        table = CTkTable(self.commit_table_frame, row=6, column=4, values=table_data)
+        table.pack(fill="both", padx=5, pady=5, expand=True)
+        
+        #LOGGER.info(list((c.html_url, (c.stats.additions, c.stats.deletions, c.stats.total), i+1) for i, c in enumerate(get_commits_since(REPO, None))))
+        #LOGGER.info(len(list((c.last_modified, c.stats) for c in get_commits_since(REPO, None))))
         
         
         # Displaying Status Data in a Table in status_frame

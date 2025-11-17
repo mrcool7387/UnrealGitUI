@@ -6,5 +6,8 @@
         "user": "mrcool7387",
         "token": "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",
         "##comment_{token}##": "Temporary Test Token"
+    },
+    "dashboard": {
+        "last_commits": 5
     }
 }
