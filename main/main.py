@@ -36,6 +36,7 @@ def toggle_mode(event=None):
 rootwin = ctk.CTk()
 rootwin.title(CONFIG.get('app_title', 'ERROR LOADING TITLE'))
 rootwin.geometry("800x930")
+rootwin.resizable(False, False)
 ctk.set_appearance_mode(CONFIG.get("mode", "dark"))
 
 tabs = ctk.CTkTabview(rootwin)

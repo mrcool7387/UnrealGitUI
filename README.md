@@ -1,6 +1,64 @@
 # UnrealGitUI
 UnrealGitUI is a graphical user interface (GUI) application designed to facilitate interaction with Git repositories, specifically tailored for Unreal Engine projects. It aims to simplify version control tasks for developers working within the Unreal Engine ecosystem.
 
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Team
+    actor User
+    participant UI as UnrealGitUI
+    participant Git as Git Repository
+    participant UE as Unreal Engine Editor
+    participant GH as GitHub
+    participant AI as Google Gemini
+
+    %% Start
+    User ->> UI: Startet das Tool
+
+    UI ->>+ Git: Pull und Sync, Pre-Launch Check
+    Git -->>- UI: Status zurück
+    UI ->> UI: Projektdatei prüfen und Konflikte prüfen
+
+    UI ->> UE: Öffnet Unreal Engine
+
+    UE -->> UI: Benutzer arbeitet im Editor
+    UE -->> Team: Team arbeitet im Editor
+    UE -->> UI: UE wird geschlossen
+
+    UI ->> Git: git status
+    Git -->> UI: Geänderte Dateien
+    UI ->> Git: git add .
+    UI ->> Git: git commit
+
+    opt Commit Message per KI
+        UI ->> AI: Daten senden
+        AI ->> AI: Generiert Commit Message
+        AI ->> UI: Commit Message zurück
+    end
+
+    Git -->> UI: Commit erfolgreich
+
+    critical Push und PR
+        UI ->> Git: git push
+        Git -->> UI: Push erfolgreich
+
+        opt Auto Clean
+            UI ->> UI: Löscht unnötige Dateien
+        end
+
+        opt PR Erstellung
+            UI ->> GH: Branch und PR Daten
+            GH -->> UI: Bestätigung und PR Link
+            UI ->> Team: Neuer PR
+            GH -->> Team: PR Info und Review Link
+        end
+    option Push schlägt fehl
+        UI ->> UI: Meldet Fehler
+        UI ->> Team: Push Fehler Info
+    end
+
+```
+
 
 ## 📋 Tool-Checkliste: Professionelles Developer-Tool (Mini-IDE für Unreal-Git-Workflows)
 

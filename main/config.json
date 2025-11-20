@@ -3,11 +3,14 @@
     "mode": "dark",
     "git": {
         "repo": "Guns-And-Choices",
-        "user": "mrcool7387",
-        "token": "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",
-        "##comment_{token}##": "Temporary Test Token"
+        "user": "mrcool7387"
     },
     "dashboard": {
         "last_commits": 5
+    },
+    "paths": {
+        "unreal": "C:\\Program Files\\Epic Games\\UE_4.27\\Engine\\Binaries\\Win64\\UE4Editor.exe",
+        "unreal_project_file": "C:\\Users\\Alexander Schwarz\\Desktop\\Guns-And-Choices\\Guns_And_Choices.uproject",
+        "git": "C:\\Program Files\\Git\\cmd\\git.exe"
     }
 }

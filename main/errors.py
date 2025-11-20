@@ -3,5 +3,13 @@ class ConfigError(Exception):
     pass
 
 class PyProjectError(Exception):
-    """Custom exception for pyproject.toml validation errors."""
+    """Exception for pyproject.toml validation errors."""
+    pass
+
+class MissingDotEnvFile(Exception):
+    """Exception for Missing `.env` File"""
+    pass
+
+class MissingGithubToken(Exception):
+    """Exception if Github Token is Missing"""
     pass

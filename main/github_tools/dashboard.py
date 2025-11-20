@@ -4,7 +4,7 @@ from main.github_tools.token import GIT_AUTH_TOKEN
 
 GIT_CLIENT = Github(GIT_AUTH_TOKEN)
 
-def get_last_commit(repo_name: str, branch: str = "main"):
+def get_last_commit(repo_name: str, branch: str = "master"):
     repo = GIT_CLIENT.get_repo(repo_name)
     branch_ref = repo.get_branch(branch)
     return branch_ref.commit

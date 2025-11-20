@@ -30,9 +30,7 @@ class DashboardUI(ctk.CTkFrame):
         LOGGER.debug("Commit Details Frame created. {}".format(repr(self.commit_details_frame)))
         self.start_frame = ctk.CTkFrame(self)
         self.start_frame.grid(row=1, column=1, padx=10, pady=10, sticky="nsew")
-        self.start_button = ctk.CTkButton(self.start_frame, text="Start Workflow", command=lambda: LOGGER.info("Start Workflow button clicked"))
-        self.start_button.pack(padx=20, pady=20)
-        LOGGER.debug("Start Frame and Button created. {}".format(repr(self.start_frame)))
+        LOGGER.debug("Start Frame created. {}".format(repr(self.start_frame)))
 
         # Collapsible Logs Frame
         self.log_frame = ctk.CTkFrame(self)
@@ -123,31 +121,93 @@ class DashboardUI(ctk.CTkFrame):
         # Status Frame
         status_data: dict[str, str | int] = get_repo_info(REPO)
         status_data['commits'] = get_commits_since(REPO, since_datetime=None).totalCount
-        status_data['prs'] = get_prs("{}/{}".format(CONFIG['git']['user'], CONFIG['git']['repo']))
+        status_data['prs'] = get_prs(REPO)
         last_release: None | GitRelease = get_last_release(REPO)
         status_data['last_release'] = str(last_release) if last_release else "N/A"
         LOGGER.debug("Status Data: {}".format(status_data))
         
-        # Table displaying last 5 commits in commit_table_frame
+        # ========== Status Table ==========
+        status_data_values: list[list[str]] = []
+        for key, value in status_data.items():
+            status_data_values.append([key.replace("_", " ").capitalize(), str(value)])
+        
+        status_table = CTkTable(
+            self.status_frame, 
+            values=status_data_values, 
+            row= len(status_data_values), 
+            column=2,  # 2 Spalten: Name und Wert
+            width=400
+        )
+        status_table.pack(fill="both", padx=5, pady=5, expand=True)
+        
+        # ========== Last 5 Commits Table ==========
         last_five_commits = get_last_x_commits(REPO, CONFIG.get("dashboard", {}).get("last_commits", 5))
         table_data: list[list[str]] = [["SHA", "Add", "Del", "Total"]]
         for c in last_five_commits:
-            table_data.append([str(c.sha[10:]) + "...", str(c.stats.additions), str(c.stats.deletions), str(c.stats.total)])
+            table_data.append([str(c.sha[:10]) + "...", str(c.stats.additions), str(c.stats.deletions), str(c.stats.total)])
+        
+        commit_table_label = ctk.CTkLabel(self.commit_table_frame, text=f"Last {len(last_five_commits)} Commits", font=("", 14))
+        commit_table_label.pack(pady=10)
+        
+        commit_table = CTkTable(
+            self.commit_table_frame, 
+            values=table_data, 
+            row=len(table_data), 
+            column=len(table_data[0]), 
+            width=300
+        )
+        commit_table.pack(fill="both", padx=5, pady=5, expand=True)
+        
+        # ========== Last Commit Details ==========
+        last_commit = get_last_commit(REPO)
+        if last_commit:
+            details_data = [
+                ["SHA", last_commit.sha],
+                ["Kurze Nachricht", last_commit.commit.message.splitlines()[0]],
+                ["Ausführliche Nachricht", last_commit.commit.message],
+                ["Autor", last_commit.commit.author.name],
+                ["Autor Email", last_commit.commit.author.email],
+                ["Datum", str(last_commit.commit.author.date)],
+                ["Dateien geändert", len([f.filename for f in last_commit.files])]
+            ]
+            commit_details_label = ctk.CTkLabel(self.commit_details_frame, text="Last Commit Details", font=("", 14))
+            commit_details_label.pack(pady=10)
+            
+            details_table = CTkTable(
+                self.commit_details_frame,
+                values=details_data,
+                row=len(details_data),
+                column=2,
+                width=600
+            )
+            details_table.pack(fill="both", padx=5, pady=5, expand=True)
+        
+        PATHS: dict = CONFIG.get('paths', {})
+        unreal_check = os.path.exists(PATHS.get('unreal', None)) and str(PATHS.get('unreal', "")).endswith('.exe')  # type: ignore
+        unreal_project_check = os.path.exists(PATHS.get('unreal_project_file', None)) and str(PATHS.get('unreal_project_file', "")).endswith('.uproject')  # type: ignore
+        git_check = os.path.exists(PATHS.get('git', None)) and str(PATHS.get('git', "")).endswith('.exe') # type: ignore
+        
+        LOGGER.info(f"Unreal ({unreal_check}): {PATHS.get('unreal', None)}")
+        LOGGER.info(f"Unreal Project File ({unreal_project_check}): {PATHS.get('unreal_project_file', None)}")
+        LOGGER.info(f"Git ({git_check}): {PATHS.get('git', None)}")
+        
+        workflow_table = CTkTable(
+            self.start_frame, 
+            values=[
+                ["Unreal", "Found" if unreal_check else "Not Found"], 
+                ["Unreal Project File", "Found" if unreal_project_check else "Not Found"], 
+                ["Git", "Found" if git_check else "Not Found"]
+            ]
+        )
+        workflow_table.pack(fill="both", padx=5, pady=5, expand=True)
+        
+        self.start_button = ctk.CTkButton(self.start_frame, text="Start Workflow", command=lambda: LOGGER.info("Start Workflow button clicked"))
+        self.start_button.pack(padx=20, pady=20)
+        
+        if unreal_check and unreal_project_check and git_check:
+            self.start_button.configure(state="normal", fg_color="#187e18")  # aktiv & grün
+        else:
+            self.start_button.configure(state="disabled", fg_color="#8a0000")  # deaktiviert & rot
 
-        table_label = ctk.CTkLabel(self.commit_table_frame, text=f"Last {CONFIG.get("dashboard", {}).get("last_commits", 5)} Commits", font=("", 14))
-        table_label.pack(pady=10)
-
-        table = CTkTable(self.commit_table_frame, row=6, column=4, values=table_data)
-        table.pack(fill="both", padx=5, pady=5, expand=True)
-        
-        #LOGGER.info(list((c.html_url, (c.stats.additions, c.stats.deletions, c.stats.total), i+1) for i, c in enumerate(get_commits_since(REPO, None))))
-        #LOGGER.info(len(list((c.last_modified, c.stats) for c in get_commits_since(REPO, None))))
-        
-        
-        # Displaying Status Data in a Table in status_frame
-        ...
-        
-        # Displaying last Commit and Last Commit Details
-        ...
         
         LOGGER.info("Dashboard data loaded.")

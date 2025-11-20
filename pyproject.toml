@@ -6,8 +6,10 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "black>=25.11.0",
+    "ctkmessagebox>=2.7",
     "ctktable>=1.1",
     "customtkinter>=5.2.2",
+    "dotenv>=0.9.9",
     "isort>=7.0.0",
     "pygithub>=2.8.1",
     "pywinpty>=3.0.2",
