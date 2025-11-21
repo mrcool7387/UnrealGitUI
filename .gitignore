@@ -9,9 +9,17 @@
 logs/
 log/
 
-# Python
+# Cache
 __pycache__
 __pycache__/*
+.pytest_cache
+.pytest_cache/*
 
 # .env
 .env
+
+# VsCode Files
+.vscode
+.vscode/*
+
+
